@@ -17,6 +17,7 @@ import model.Dates;
 import model.Pagantes;
 import model.Times;
 import utils.LogHandler;
+import view.Janela;
 
 public class FileHandler {
 	private Path p = Paths.get("./bancodeinformacoes.txt");
@@ -33,7 +34,7 @@ public class FileHandler {
 		}
 	}
 
-	public String criarBancoDeDados(int numRegistros) throws IOException {
+	public void criarBancoDeDados(int numRegistros) throws IOException {
 		Random r = new Random();
 		int golsTimeCasa;
 		int golsTimeFora;
@@ -60,9 +61,13 @@ public class FileHandler {
 				streamOutput = line.getBytes();
 				out.write(streamOutput, 0, streamOutput.length);
 				totalBytes = totalBytes + streamOutput.length;
-				if(totalBytes % 100000 == 0)
+				if ((start - System.currentTimeMillis()) % 3000 == 0) {
 					log.log("Escrevendo o arquivo... Total parcial: " + totalBytes / 1000000 + "Mb!");
-			}while(totalBytes < 1000000000);
+					Janela.textArea.update(Janela.textArea.getGraphics());
+					Janela.scrollPane.revalidate();
+					Janela.scrollPane.repaint();
+				}
+			} while (totalBytes < 1073741824);
 		} else {
 			for (int i = 0; i < numRegistros; i++) {
 				golsTimeCasa = r.nextInt(5);
@@ -74,27 +79,53 @@ public class FileHandler {
 				streamOutput = line.getBytes();
 				out.write(streamOutput, 0, streamOutput.length);
 				totalBytes = totalBytes + streamOutput.length;
-				if(totalBytes % 100000 == 0)
+				if ((start - System.currentTimeMillis()) % 3000 == 0) {
 					log.log("Escrevendo o arquivo... Total parcial: " + totalBytes / 1000000 + "Mb!");
+					Janela.textArea.update(Janela.textArea.getGraphics());
+					Janela.scrollPane.revalidate();
+					Janela.scrollPane.repaint();
+				}
 			}
 		}
 		Long conclusao = (System.currentTimeMillis() - start) / 1000;
-		String l = log.log("Finalizado processo de geracao de informacoes no banco. Foi escrito: " + totalBytes / 1000000
-				+ "Mb. Tempo de excucao: " + conclusao  + "s.");
+		log.log("Finalizado processo de geracao de informacoes no banco. Foi escrito: " + totalBytes / 1000000
+				+ "Mb. Tempo de excucao: " + conclusao + "s.");
 
-		return l;
 	}
 
 	public String recuperarBancoDeDados(int numRegistros) {
 		long start = System.currentTimeMillis();
 		log.log("Iniciando processo de recuperacao de informacoes no banco de dados!");
-		String line;
+		String line = "";
+		long totalBytes = 0;
 		try (BufferedReader br = new BufferedReader(new FileReader("./bancodeinformacoes.txt"))) {
-			do {
-				line = br.readLine();
-				System.out.println(line);
+			if (numRegistros == 0) {
+				do {
+					line = br.readLine();
+					totalBytes += line.getBytes().length;
+					log.log(line);
+					if ((start - System.currentTimeMillis()) % 3000 == 0) {
+						log.log("Escrevendo o arquivo... Total parcial: " + totalBytes / 1000000 + "Mb!");
+						Janela.textArea.update(Janela.textArea.getGraphics());
+						Janela.scrollPane.revalidate();
+						Janela.scrollPane.repaint();
+					}
+				} while (line != null);
+			} else {
+				for (int i = 0; i < numRegistros; i++) {
+					line = br.readLine();
+					totalBytes += line.getBytes().length;
+					if ((start - System.currentTimeMillis()) % 3000 == 0) {
+						log.log("Escrevendo o arquivo... Total parcial: " + totalBytes / 1000000 + "Mb!");
+						Janela.textArea.update(Janela.textArea.getGraphics());
+						Janela.scrollPane.revalidate();
+						Janela.scrollPane.repaint();
+					}
+					if (line != null)
+						log.log(line);
+				}
+			}
 
-			} while (line != null);
 		} catch (FileNotFoundException e) {
 			log.log(e.toString());
 			e.printStackTrace();
@@ -104,8 +135,7 @@ public class FileHandler {
 		}
 
 		Long conclusao = (System.currentTimeMillis() - start) / 1000;
-		log.log("Finalizado processo de recuperacao de informacoes no banco. Tempo de execucao: " + conclusao / 1000
-				+ "s.");
+		log.log("Finalizado processo de recuperacao de informacoes no banco. Tempo de execucao: " + conclusao + "s.");
 		return conclusao.toString();
 	}
 }

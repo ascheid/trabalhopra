@@ -1,14 +1,10 @@
 package view;
 
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 
 import javax.swing.ImageIcon;
@@ -23,13 +19,9 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 
-import org.eclipse.wb.swing.FocusTraversalOnArray;
-
 import control.FileHandler;
-import utils.LogHandler;
 
 public class Janela extends JFrame {
 
@@ -38,11 +30,10 @@ public class Janela extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private JPanel contentPane;
+	public static JPanel contentPane;
 	private JTextField textField;
 	public static JTextArea textArea = new JTextArea();
 	public static JScrollPane scrollPane = new JScrollPane(textArea);
-
 	/**
 	 * Launch the application.
 	 */
@@ -81,21 +72,14 @@ public class Janela extends JFrame {
 		btnRecuperar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String line;
-				LogHandler log = new LogHandler();
-				try (BufferedReader br = new BufferedReader(new FileReader("./bancodeinformacoes.txt"))) {
-					do {
-						line = br.readLine();
-						textArea.append(line);
-					} while (line != null);
-				} catch (FileNotFoundException f) {
-					log.log(f.toString());
-					f.printStackTrace();
-				} catch (IOException c) {
-					log.log(c.toString());
-					c.printStackTrace();
-				}
-
+				FileHandler fileHandler = new FileHandler();
+				String t = textField.getText();
+				contentPane.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+				if(t.equals("") || t.equals("0"))
+					fileHandler.recuperarBancoDeDados(0);
+				else
+					fileHandler.recuperarBancoDeDados(Integer.parseInt(t));
+				contentPane.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}
 		});
 		btnRecuperar.setIcon(new ImageIcon(Janela.class.getResource("/image/usb-memory.png")));
@@ -106,18 +90,20 @@ public class Janela extends JFrame {
 		btnGerar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				contentPane.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 				FileHandler fileHandler = new FileHandler();
 				try {
 					String t = textField.getText();
 					if (t.equals("") || t.equals("0")) {
-						textArea.append(fileHandler.criarBancoDeDados(0));
+						fileHandler.criarBancoDeDados(0);
 					} else
-						textArea.append(fileHandler.criarBancoDeDados(Integer.parseInt(textField.getText())));
+						fileHandler.criarBancoDeDados(Integer.parseInt(textField.getText()));
 				} catch (NumberFormatException e1) {
 					e1.printStackTrace();
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
+				contentPane.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}
 		});
 		btnGerar.setIcon(new ImageIcon(Janela.class.getResource("/image/hard-disk.png")));
@@ -146,9 +132,8 @@ public class Janela extends JFrame {
 		contentPane.add(lblNewLabel_1);
 		scrollPane.setAutoscrolls(true);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
 		scrollPane.setBounds(20, 58, 793, 349);
 		contentPane.add(scrollPane);
-		scrollPane.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[] { textArea }));
+		
 	}
 }
