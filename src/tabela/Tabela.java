@@ -26,7 +26,7 @@ public class Tabela {
 			"Internacional", "Vitória", "Atlético Paranense",
 			"Atlético Mineiro", "Santos", "Fluminense", "Criciuma", "JEC",
 			"Juventos", "Real Madrid", "Bayern" };
-
+/*
 	public static void main(String[] args) throws IOException {
 
 		final long startTime = System.nanoTime();
@@ -46,7 +46,7 @@ public class Tabela {
 
 		System.out.println(duration);
 	}
-
+*/
 	public static String dataJogo() {
 
 		String data = "";
